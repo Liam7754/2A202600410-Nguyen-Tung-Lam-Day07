@@ -3,8 +3,10 @@ from __future__ import annotations
 import os
 import sys
 from pathlib import Path
-
+import uuid
 from dotenv import load_dotenv
+
+load_dotenv()
 
 from src.agent import KnowledgeBaseAgent
 from src.embeddings import (
@@ -17,6 +19,9 @@ from src.embeddings import (
 )
 from src.models import Document
 from src.store import EmbeddingStore
+from src.chunking import SentenceChunker, FixedSizeChunker, RecursiveChunker
+
+MAX_SENTENCES_PER_CHUNK = 5
 
 SAMPLE_FILES = [
     "data/python_intro.txt",
@@ -25,11 +30,16 @@ SAMPLE_FILES = [
     "data/customer_support_playbook.txt",
     "data/chunking_experiment_report.md",
     "data/vi_retrieval_notes.md",
+    "data/data.txt"
 ]
 
 
 def load_documents_from_files(file_paths: list[str]) -> list[Document]:
     """Load documents from file paths for the manual demo."""
+
+    chunker = FixedSizeChunker(chunk_size=500, overlap=50)
+    
+    
     allowed_extensions = {".md", ".txt"}
     documents: list[Document] = []
 
@@ -45,20 +55,27 @@ def load_documents_from_files(file_paths: list[str]) -> list[Document]:
             continue
 
         content = path.read_text(encoding="utf-8")
-        documents.append(
-            Document(
-                id=path.stem,
-                content=content,
-                metadata={"source": str(path), "extension": path.suffix.lower()},
+        for ith, chunk_str in enumerate(chunker.chunk(content)):
+            # use uuid for global indexing for all chunks for all files
+            # anh use chunk order in metadata
+            documents.append(
+                Document(
+                    id=str(uuid.uuid4()),
+                    content=chunk_str,
+                    metadata={
+                        "chunk_id": ith,
+                        "source": str(path), 
+                        "extension": path.suffix.lower()
+                    },
+                )
             )
-        )
 
     return documents
 
 
 def demo_llm(prompt: str) -> str:
     """A simple mock LLM for manual RAG testing."""
-    preview = prompt[:400].replace("\n", " ")
+    preview = prompt[:900].replace("\n", " ")
     return f"[DEMO LLM] Generated answer from prompt preview: {preview}..."
 
 
@@ -106,9 +123,9 @@ def run_manual_demo(question: str | None = None, sample_files: list[str] | None 
     print(f"\nStored {store.get_collection_size()} documents in EmbeddingStore")
     print("\n=== EmbeddingStore Search Test ===")
     print(f"Query: {query}")
-    search_results = store.search(query, top_k=3)
+    search_results = store.search(query, top_k=5)
     for index, result in enumerate(search_results, start=1):
-        print(f"{index}. score={result['score']:.3f} source={result['metadata'].get('source')}")
+        print(f"{index}. score={result['score']:.3f} source={result['metadata'].get('source')}| chunk_id: {result['metadata'].get('chunk_id')}")
         print(f"   content preview: {result['content'][:120].replace(chr(10), ' ')}...")
 
     print("\n=== KnowledgeBaseAgent Test ===")
@@ -118,6 +135,9 @@ def run_manual_demo(question: str | None = None, sample_files: list[str] | None 
     print(agent.answer(query, top_k=3))
     return 0
 
+# example user query
+# "Điều kiện để học cùng lúc hai chương trình tại Trường đại học VinUni"
+# python main.py Điều kiện để học cùng lúc hai chương trình tại Trường đại học VinUni
 
 def main() -> int:
     question = " ".join(sys.argv[1:]).strip() if len(sys.argv) > 1 else None
