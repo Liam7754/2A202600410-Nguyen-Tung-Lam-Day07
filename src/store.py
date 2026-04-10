@@ -166,5 +166,5 @@ class EmbeddingStore:
             self._collection.delete(where={"doc_id": doc_id})
             return self._collection.count() < initial_count
         else:
-            self._store = [r for r in self._store if r["metadata"].get("doc_id") != doc_id]
+            self._store = [r for r in self._store if r["id"] != doc_id]
             return len(self._store) < initial_count

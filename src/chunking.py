@@ -164,16 +164,16 @@ class ChunkingStrategyComparator:
         recursive = RecursiveChunker(chunk_size=chunk_size)
         
         strategies = {
-            "fixed": fixed.chunk(text),
-            "sentence": sentence.chunk(text),
+            "fixed_size": fixed.chunk(text),
+            "by_sentences": sentence.chunk(text),
             "recursive": recursive.chunk(text)
         }
         
         results = {}
         for name, chunks in strategies.items():
             results[name] = {
-                "num_chunks": len(chunks),
-                "avg_chunk_length": sum(len(c) for c in chunks) / len(chunks) if chunks else 0,
+                "count": len(chunks),
+                "avg_length": sum(len(c) for c in chunks) / len(chunks) if chunks else 0,
                 "max_chunk_length": max(len(c) for c in chunks) if chunks else 0,
                 "chunks": chunks
             }
