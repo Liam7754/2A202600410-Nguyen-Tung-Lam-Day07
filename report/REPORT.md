@@ -1,8 +1,8 @@
 # Báo Cáo Lab 7: Embedding & Vector Store
 
-**Họ tên:** [Tên sinh viên]
-**Nhóm:** [Tên nhóm]
-**Ngày:** [Ngày nộp]
+**Họ tên:** Nguyễn Tùng Lâm
+**Nhóm:** X5
+**Ngày:** 10/4/2026
 
 ---
 
@@ -11,17 +11,17 @@
 ### Cosine Similarity (Ex 1.1)
 
 **High cosine similarity nghĩa là gì?**
-> *Viết 1-2 câu:*
+→ Hai vector biểu diễn câu gần như gần bằng 0 khi tính bằng công thức cosine similarity hay gần như cùng hướng trong không gian, nghĩa là nội dung/ý nghĩa của chúng rất giống nhau.
 
 **Ví dụ HIGH similarity:**
-- Sentence A:
-- Sentence B:
-- Tại sao tương đồng:
+- Sentence A: "The cat is sleeping on the sofa."
+- Sentence B: "A cat rests on the couch."
+- Tại sao tương đồng: Cả hai đều mô tả cùng một sự việc (con mèo đang nằm nghỉ trên ghế).
 
 **Ví dụ LOW similarity:**
-- Sentence A:
-- Sentence B:
-- Tại sao khác:
+- Sentence A: "I love playing football."
+- Sentence B: "The weather is rainy today."
+- Tại sao khác: Một câu nói về sở thích, câu kia nói về thời tiết, không liên quan về ngữ nghĩa.
 
 **Tại sao cosine similarity được ưu tiên hơn Euclidean distance cho text embeddings?**
 > *Viết 1-2 câu:*
@@ -31,10 +31,15 @@
 **Document 10,000 ký tự, chunk_size=500, overlap=50. Bao nhiêu chunks?**
 > *Trình bày phép tính:*
 > *Đáp án:*
+Công thức: Số bước nhảy = chunk_size – overlap = 500 – 50 = 450
+Số chunks = ⌈(10,000 – 500) / 450⌉ + 1
+= ⌈9,500 / 450⌉ + 1 = ⌈21.11⌉ + 1 = 22 + 1 = 23 chunks
 
 **Nếu overlap tăng lên 100, chunk count thay đổi thế nào? Tại sao muốn overlap nhiều hơn?**
 > *Viết 1-2 câu:*
-
+Bước nhảy = 500 – 100 = 400
+Số chunks = ⌈(10,000 – 500) / 400⌉ + 1
+= ⌈9,500 / 400⌉ + 1 = ⌈23.75⌉ + 1 = 24 + 1 = 25 chunks
 ---
 
 ## 2. Document Selection — Nhóm (10 điểm)
